@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 
+    <modelVersion>4.0.0</modelVersion>
+ 
+    <!-- ─────────────────────────────────────────
+         Parent: Spring Boot BOM
+    ───────────────────────────────────────────── -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.0</version>
+        <relativePath/>
+    </parent>
+ 
+    <!-- ─────────────────────────────────────────
+         Root project coordinates
+    ───────────────────────────────────────────── -->
+    <groupId>com.ticketing</groupId>
+    <artifactId>ticket-booking-system</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+ 
+    <name>ticket-booking-system</name>
+    <description>Scalable ticket booking system with Redis, Kafka, and PostgreSQL</description>
+ 
+    <!-- ─────────────────────────────────────────
+         Modules (order matters for build)
+         common must be first — others depend on it
+    ───────────────────────────────────────────── -->
+    <modules>
+        <module>common</module>
+        <module>api-gateway</module>
+        <module>booking-service</module>
+        <module>payment-service</module>
+        <module>cancellation-service</module>
+        <module>notification-service</module>
+    </modules>
+ 
+    <!-- ─────────────────────────────────────────
+         Global properties
+    ───────────────────────────────────────────── -->
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ 
+        <!-- Dependency versions (single place to upgrade) -->
+        <spring-cloud.version>2023.0.2</spring-cloud.version>
+        <lombok.version>1.18.32</lombok.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
+        <redisson.version>3.29.0</redisson.version>
+        <jackson.version>2.17.1</jackson.version>
+    </properties>
+ 
+    <!-- ─────────────────────────────────────────
+         Dependency Management
+         Declares versions — does NOT add deps.
+         Each child opts in via <dependencies>.
+    ───────────────────────────────────────────── -->
+    <dependencyManagement>
+        <dependencies>
+ 
+            <!-- Spring Cloud BOM (Gateway, LoadBalancer, etc.) -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+ 
+            <!-- Testcontainers BOM -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+ 
+            <!-- Internal: common module -->
+            <dependency>
+                <groupId>com.ticketing</groupId>
+                <artifactId>common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+ 
+            <!-- Redisson (distributed lock on top of Redis) -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+ 
+            <!-- MapStruct (DTO <-> Entity mapping) -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+                <scope>provided</scope>
+            </dependency>
+ 
+            <!-- Testcontainers modules -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>postgresql</artifactId>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>kafka</artifactId>
+                <scope>test</scope>
+            </dependency>
+ 
+        </dependencies>
+    </dependencyManagement>
+ 
+    <!-- ─────────────────────────────────────────
+         Dependencies inherited by ALL modules
+         Keep this minimal — only truly universal deps
+    ───────────────────────────────────────────── -->
+    <dependencies>
+ 
+        <!-- Lombok: available everywhere -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+ 
+        <!-- Spring Boot Test: available in every module's test scope -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+ 
+    </dependencies>
+ 
+    <!-- ─────────────────────────────────────────
+         Build plugins (inherited by all modules)
+    ───────────────────────────────────────────── -->
+    <build>
+        <pluginManagement>
+            <plugins>
+ 
+                <!-- Spring Boot Maven Plugin
+                     Only packaging=jar modules with a main class
+                     will actually repackage into a fat jar.
+                     common (no main class) is unaffected. -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+ 
+                <!-- Compiler plugin: wire Lombok + MapStruct annotation processors -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+ 
+                <!-- Surefire: run unit tests -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <useSystemClassLoader>false</useSystemClassLoader>
+                    </configuration>
+                </plugin>
+ 
+                <!-- Failsafe: run integration tests (*IT.java) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+ 
+            </plugins>
+        </pluginManagement>
+    </build>
+ 
+    <!-- ─────────────────────────────────────────
+         Profiles
+    ───────────────────────────────────────────── -->
+    <profiles>
+ 
+        <!-- local: skips integration tests for fast local builds -->
+        <profile>
+            <id>local</id>
+            <properties>
+                <skipITs>true</skipITs>
+            </properties>
+        </profile>
+ 
+        <!-- ci: runs everything including integration tests -->
+        <profile>
+            <id>ci</id>
+            <properties>
+                <skipITs>false</skipITs>
+            </properties>
+        </profile>
+ 
+    </profiles>
+ 
+</project>
+ 
