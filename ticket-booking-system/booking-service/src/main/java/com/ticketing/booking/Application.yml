@@ -1,0 +1,80 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: booking-service
+
+  # ── PostgreSQL ──────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticketdb
+    username: ticketuser
+    password: ticketpass
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate          # use Flyway/Liquibase in prod; validate ensures schema matches
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # ── Redis ───────────────────────────────────────────────────
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+
+  # ── Kafka ───────────────────────────────────────────────────
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+# ── Redisson (distributed lock) ─────────────────────────────
+redisson:
+  address: redis://localhost:6379
+  connectionMinimumIdleSize: 2
+  connectionPoolSize: 8
+
+# ── Kafka topic names (single place to change) ───────────────
+kafka:
+  topics:
+    booking-created: booking.created
+    booking-cancelled: booking.cancelled
+
+# ── Booking business config ──────────────────────────────────
+booking:
+  seat-hold-minutes: 10
+  idempotency-ttl-hours: 24
+
+# ── Actuator ─────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# ── Logging ──────────────────────────────────────────────────
+logging:
+  level:
+    com.ticketing.booking: DEBUG
+    org.springframework.kafka: INFO
+    org.hibernate.SQL: DEBUG
