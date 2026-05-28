@@ -8,7 +8,7 @@ import com.ticketing.booking.kafka.BookingEventProducer;
 import com.ticketing.booking.model.BookingEntity;
 import com.ticketing.booking.model.BookingEntity.BookingStatus;
 import com.ticketing.booking.model.SeatEntity;
-import com.ticketing.booking.model.event.BookingCreatedEvent;
+import com.ticketing.common.dto.BookingCreatedEvent;
 import com.ticketing.booking.repository.BookingRepository;
 import com.ticketing.booking.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;

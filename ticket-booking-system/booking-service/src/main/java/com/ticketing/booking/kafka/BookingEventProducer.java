@@ -1,6 +1,6 @@
 package com.ticketing.booking.kafka;
 
-import com.ticketing.booking.model.event.BookingCreatedEvent;
+import com.ticketing.common.dto.BookingCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
