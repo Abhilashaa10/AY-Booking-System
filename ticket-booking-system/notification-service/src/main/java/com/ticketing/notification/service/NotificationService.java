@@ -48,7 +48,7 @@ public class NotificationService {
         // For now we simulate with userId as recipient placeholder
         String recipient = "user-" + event.getUserId() + "@ticketing.com";
 
-        String subject = "Booking Confirmed! 🎉";
+        String subject = "Booking Confirmed! ";
         String body = String.format("""
                 Hi there!
                 
