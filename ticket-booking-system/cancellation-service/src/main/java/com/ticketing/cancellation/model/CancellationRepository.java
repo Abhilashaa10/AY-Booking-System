@@ -1,4 +1,4 @@
-package com.ticketing.cancellation.repository;
+package com.ticketing.cancellation.model;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
