@@ -7,7 +7,7 @@ spring:
 
   # ── PostgreSQL ──────────────────────────────────────────────
   datasource:
-    url: jdbc:postgresql://localhost:5432/ticketdb
+    url: jdbc:postgresql://localhost:5433/ticketdb
     username: ticketuser
     password: ticketpass
     driver-class-name: org.postgresql.Driver
