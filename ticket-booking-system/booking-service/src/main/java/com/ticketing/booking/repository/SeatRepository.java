@@ -26,6 +26,15 @@ public interface SeatRepository extends JpaRepository<SeatEntity, UUID> {
     @Query("SELECT COUNT(s) FROM SeatEntity s WHERE s.eventId = :eventId AND s.status = 'AVAILABLE'")
     long countAvailableByEventId(@Param("eventId") UUID eventId);
 
+    @Query("SELECT s FROM SeatEntity s WHERE s.eventId = :eventId")
+    List<SeatEntity> findByEventId(@Param("eventId") UUID eventId);
+
+    @Query("SELECT s FROM SeatEntity s WHERE s.eventId = :eventId AND s.status = 'AVAILABLE'")
+    List<SeatEntity> findAvailableSeatsByEventId(@Param("eventId") UUID eventId);
+
     @Query("SELECT COUNT(s) FROM SeatEntity s WHERE s.eventId = :eventId AND s.status = :status")
-Long countByEventIdAndStatus(UUID eventId, String status);
+    Long countByEventIdAndStatus(@Param("eventId") UUID eventId, @Param("status") String status);
+
+    @Query("SELECT s FROM SeatEntity s WHERE s.eventId = :eventId AND s.seatNumber = :seatNumber")
+    Optional<SeatEntity> findByEventIdAndSeatNumber(@Param("eventId") UUID eventId, @Param("seatNumber") String seatNumber);
 }
